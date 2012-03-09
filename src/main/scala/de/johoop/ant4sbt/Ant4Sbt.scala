@@ -13,10 +13,8 @@ package de.johoop.ant4sbt
 
 import sbt._
 import sbt.Keys._
-import org.apache.tools.ant.{ Project => AntProject, DefaultLogger, ProjectHelper }
-import org.apache.tools.ant.BuildListener
-import org.apache.tools.ant.BuildEvent
 import de.johoop.ant4sbt.ant.AntBuildListener
+import de.johoop.ant4sbt.ant.AntProject
 
 object Ant4Sbt extends Plugin with Settings {
 
@@ -27,17 +25,8 @@ object Ant4Sbt extends Plugin with Settings {
   def antTask(buildFile: File, streams: TaskStreams): Unit = {
     streams.log.debug("Executing ant task for build file '%s'" format buildFile.getAbsolutePath)
 
-    val project = new AntProject
-    project.setUserProperty("ant.file", buildFile.getAbsolutePath)
+    val project = new AntProject(buildFile, streams.log)
 
-    project addBuildListener new AntBuildListener(streams.log)
-
-    project.init
-
-    val antProjectHelper = ProjectHelper.getProjectHelper
-    project.addReference("project.helper", antProjectHelper)
-    antProjectHelper.parse(project, buildFile)
-
-    project executeTarget project.getDefaultTarget
+    project.defaultTarget
   }
 }
