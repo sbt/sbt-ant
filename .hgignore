@@ -1,0 +1,17 @@
+syntax: regexp
+
+^\.cache$
+^\.target$
+^\.history$
+^\.classpath$
+^\.project$
+^bin$
+^\.settings$
+^target$
+^\.scala_dependencies$
+^lib/
+^project/boot$
+^project/target$
+^project/plugins/project$
+^project/plugins/target$
+^project/project/target$
