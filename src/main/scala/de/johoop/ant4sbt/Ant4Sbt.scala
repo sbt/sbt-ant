@@ -14,6 +14,9 @@ package de.johoop.ant4sbt
 import sbt._
 import sbt.Keys._
 import org.apache.tools.ant.{ Project => AntProject, DefaultLogger, ProjectHelper }
+import org.apache.tools.ant.BuildListener
+import org.apache.tools.ant.BuildEvent
+import de.johoop.ant4sbt.ant.AntBuildListener
 
 object Ant4Sbt extends Plugin with Settings {
 
@@ -27,11 +30,7 @@ object Ant4Sbt extends Plugin with Settings {
     val project = new AntProject
     project.setUserProperty("ant.file", buildFile.getAbsolutePath)
 
-    val consoleLogger = new DefaultLogger
-    consoleLogger setErrorPrintStream System.err
-    consoleLogger setOutputPrintStream System.out
-    consoleLogger setMessageOutputLevel AntProject.MSG_INFO
-    project addBuildListener consoleLogger
+    project addBuildListener new AntBuildListener(streams.log)
 
     project.init
 
