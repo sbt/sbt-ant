@@ -18,15 +18,16 @@ import de.johoop.ant4sbt.ant.AntProject
 
 object Ant4Sbt extends Plugin with Settings {
 
-  val antSettings = Seq(
-      antBuildFile := file("build.xml"),
-      ant <<= (antBuildFile, streams) map antTask)
+  def antSettings(buildFile: File) : Seq[Setting[_]]= {
+    val project = new AntProject(buildFile)
 
-  def antTask(buildFile: File, streams: TaskStreams): Unit = {
-    streams.log.debug("Executing ant task for build file '%s'" format buildFile.getAbsolutePath)
-
-    val project = new AntProject(buildFile, streams.log)
-
-    project.defaultTarget
+    project.targets map { antTarget =>
+      TaskKey[Unit]("ant-" + antTarget) <<= streams map { streams =>
+        project addLogger streams.log
+        project runTarget antTarget
+      }
+    } toSeq
   }
+
+  def ant(s: String) = TaskKey[Unit]("ant-" + s)
 }

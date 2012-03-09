@@ -1,28 +1,41 @@
 package de.johoop.ant4sbt.ant
 
+import scala.collection.JavaConverters._
 import java.io.File
+
 import org.apache.tools.ant._
 import sbt.Logger
 
-class AntProject(buildFile: File, logger: Logger) {
-  val project = initializeProject
-  parseBuildFile(project)
+class AntProject(buildFile: File) {
+  private val project = initializeProject
+  private var loggerAdded = false
+
+  parseBuildFile
 
   private def initializeProject = {
     val project = new Project
     project.setUserProperty("ant.file", buildFile.getAbsolutePath)
-    project addBuildListener new AntBuildListener(logger)
     project.init
+
     project
   }
 
-  private def parseBuildFile(project: Project) = {
+  private def parseBuildFile = {
     val antProjectHelper = ProjectHelper.getProjectHelper
     project.addReference("project.helper", antProjectHelper)
     antProjectHelper.parse(project, buildFile)
   }
 
-  def defaultTarget = target(project.getDefaultTarget)
+  def addLogger(logger: Logger) = {
+    if (! loggerAdded) {
+        project addBuildListener new AntBuildListener(logger)
+        loggerAdded = true
+    }
+  }
 
-  def target(target: String) = project executeTarget target
+  def runDefaultTarget = runTarget(project.getDefaultTarget)
+
+  def runTarget(target: String) = project executeTarget target
+
+  def targets = project.getCopyOfTargets.keySet.asScala map (_.asInstanceOf[String])
 }
