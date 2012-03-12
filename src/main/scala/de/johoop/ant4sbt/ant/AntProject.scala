@@ -22,9 +22,7 @@ class AntProject(buildFile: File, baseDir: File = new File(".")) {
   }
 
   private def parseBuildFile = {
-    val antProjectHelper = ProjectHelper.getProjectHelper
-    project.addReference("project.helper", antProjectHelper)
-    antProjectHelper.parse(project, buildFile)
+    ProjectHelper.configureProject(project, buildFile)
   }
 
   def addLogger(logger: Logger) = {
