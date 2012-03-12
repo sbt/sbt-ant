@@ -6,7 +6,7 @@ import java.io.File
 import org.apache.tools.ant._
 import sbt.Logger
 
-class AntProject(buildFile: File) {
+class AntProject(buildFile: File, baseDir: File = new File(".")) {
   private val project = initializeProject
   private var loggerAdded = false
 
@@ -14,8 +14,9 @@ class AntProject(buildFile: File) {
 
   private def initializeProject = {
     val project = new Project
-    project.setUserProperty("ant.file", buildFile.getAbsolutePath)
-    project.init
+    project setUserProperty ("ant.file", buildFile.getAbsolutePath)
+    project setBaseDir baseDir
+    project init
 
     project
   }

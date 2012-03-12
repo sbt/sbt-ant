@@ -29,5 +29,5 @@ object Ant4Sbt extends Plugin with Settings {
     } toSeq
   }
 
-  def ant(s: String) = TaskKey[Unit]("ant-" + s)
+  def ant(targetName: String) = TaskKey[Unit]("ant-" + targetName)
 }
