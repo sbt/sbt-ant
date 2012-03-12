@@ -12,9 +12,7 @@ class AntProject(buildFile: File, baseDir: File) {
 
   private val classLoader = new URLClassLoader(Array(
       new URL("file:/work/misc/ant.jar"),
-      new URL("file:/work/misc/ant-launcher.jar"),
-      new URL("file:/home/joachim/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.9.1.jar"),
-      new URL("file:/home/joachim/.ivy2/local/de.johoop/ant4sbt/scala_2.9.1/sbt_0.11.2/1.0.0-SNAPSHOT/jars/ant4sbt.jar")))
+      new URL("file:/work/misc/ant-launcher.jar")))
 
   private val projectClass = `type`("org.apache.tools.ant.Project").withClassLoader(classLoader).load
   private val projectHelperClass = `type`("org.apache.tools.ant.ProjectHelper").withClassLoader(classLoader).load
