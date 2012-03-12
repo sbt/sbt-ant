@@ -2,39 +2,87 @@ package de.johoop.ant4sbt.ant
 
 import scala.collection.JavaConverters._
 import java.io.File
-
-import org.apache.tools.ant._
+import org.fest.reflect.core.Reflection._
 import sbt.Logger
+import java.net.URLClassLoader
+import java.net.URL
 
-class AntProject(buildFile: File, baseDir: File = new File(".")) {
-  private val project = initializeProject
+class AntProject(buildFile: File, baseDir: File) {
   private var loggerAdded = false
 
-  parseBuildFile
+  private val classLoader = new URLClassLoader(Array(
+      new URL("file:/work/misc/ant.jar"),
+      new URL("file:/work/misc/ant-launcher.jar"),
+      new URL("file:/home/joachim/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.9.1.jar"),
+      new URL("file:/home/joachim/.ivy2/local/de.johoop/ant4sbt/scala_2.9.1/sbt_0.11.2/1.0.0-SNAPSHOT/jars/ant4sbt.jar")))
+
+  private val projectClass = `type`("org.apache.tools.ant.Project").withClassLoader(classLoader).load
+  private val projectHelperClass = `type`("org.apache.tools.ant.ProjectHelper").withClassLoader(classLoader).load
+  private val buildListenerClass = `type`("org.apache.tools.ant.BuildListener").withClassLoader(classLoader).load
+  private val buildEventClass = `type`("org.apache.tools.ant.BuildEvent").withClassLoader(classLoader).load
+
+  private lazy val project = initializeProject
 
   private def initializeProject = {
-    val project = new Project
-    project setUserProperty ("ant.file", buildFile.getAbsolutePath)
-    project setBaseDir baseDir
-    project init
+//    val project = new Project
+    val project = constructor.in(projectClass).newInstance()
 
-    project
+//    project setUserProperty ("ant.file", buildFile.getAbsolutePath)
+    method("setUserProperty").
+        withParameterTypes(classOf[String], classOf[String]).
+        in(project).invoke("ant.file", buildFile.getAbsolutePath)
+
+//    project setBaseDir baseDir
+    method("setBaseDir").withParameterTypes(classOf[java.io.File]).in(project).invoke(baseDir)
+
+//    project init
+    method("init").in(project).invoke()
+
+    val projectRef = project.asInstanceOf[AnyRef]
+    parseBuildFile(projectRef)
+
+    projectRef
   }
 
-  private def parseBuildFile = {
-    ProjectHelper.configureProject(project, buildFile)
+  private def parseBuildFile(project: AnyRef) = {
+//    ProjectHelper.configureProject(project, buildFile)
+    staticMethod("configureProject").
+        withParameterTypes(projectClass, classOf[java.io.File]).
+        in(projectHelperClass).invoke(project, buildFile)
   }
 
   def addLogger(logger: Logger) = {
+
     if (! loggerAdded) {
-        project addBuildListener new AntBuildListener(logger)
+
+      val handler = new BuildListenerInvocationHandler(logger, classLoader)
+//    val listener = new AntBuildListener(logger)
+      val listener = java.lang.reflect.Proxy.newProxyInstance(classLoader, Array(buildListenerClass), handler)
+
+//      val listener = constructor.withParameterTypes(classOf[Logger]).in(antBuildListenerClass).newInstance(logger)
+
+//        project addBuildListener new AntBuildListener(logger)
+        method("addBuildListener").
+            withParameterTypes(buildListenerClass).
+            in(project).invoke(listener.asInstanceOf[AnyRef])
         loggerAdded = true
     }
   }
 
-  def runDefaultTarget = runTarget(project.getDefaultTarget)
+  def runDefaultTarget = {
+//    val target = project.getDefaultTarget
+    val target = method("getDefaultTarget").withReturnType(classOf[String]).in(project).invoke()
+    runTarget(target)
+  }
 
-  def runTarget(target: String) = project executeTarget target
+  def runTarget(target: String) = {
+//    project executeTarget target
+    method("executeTarget").withParameterTypes(classOf[String]).in(project).invoke(target)
+  }
 
-  def targets = project.getCopyOfTargets.keySet.asScala map (_.asInstanceOf[String])
+  def targets = {
+//  val targetsMap = project.getCopyOfTargets
+    val targetsMap = method("getCopyOfTargets").withReturnType(classOf[java.util.Map[_, _]]).in(project).invoke()
+    targetsMap.keySet.asScala map (_.asInstanceOf[String])
+  }
 }

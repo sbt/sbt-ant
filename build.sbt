@@ -6,7 +6,10 @@ version := "1.0.0-SNAPSHOT"
 
 sbtPlugin := true
 
-libraryDependencies += "org.apache.ant" % "ant" % "1.8.2"
+libraryDependencies ++= Seq(
+  "org.easytesting" % "fest-reflect" % "1.2",
+  "org.apache.ant" % "ant-launcher" % "1.7.0",
+  "org.apache.ant" % "ant" % "1.7.0")
 
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
@@ -42,4 +45,13 @@ pomExtra := (
       <url>http://jmhofer.johoop.de</url>
     </developer>
   </developers>
+  <dependencies>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-reflect</artifactId>
+      <version>1.2</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 )
