@@ -20,6 +20,8 @@ trait Settings {
   val antHome = SettingKey[File]("ant-home")
   val antServerPort = SettingKey[Int]("ant-server-port")
 
+  val antServerClasspath = TaskKey[Seq[File]]("ant-server-classpath")
+
   val antStart = TaskKey[Unit]("ant-start")
   val antStop = TaskKey[Unit]("ant-stop")
   val antRestart = TaskKey[Unit]("ant-restart")
@@ -28,13 +30,15 @@ trait Settings {
 
   val antSettings = Seq[Setting[_]](
     antServerPort := 21345,
-    antBuildFile := file("build.xml"),
-    antBaseDir := file("."),
+    antBuildFile <<= baseDirectory (_ / "build.xml"),
+    antBaseDir <<= baseDirectory,
     antHome := file(System getenv "ANT_HOME"),
 
-    antStart <<= (antBuildFile, antBaseDir, antServerPort) map startAnt,
+    antStart <<= (antBuildFile, antBaseDir, antServerPort, antServerClasspath) map startAnt,
     antStop <<= antServerPort map stopAnt,
-    antRestart <<= (antBuildFile, antBaseDir, antServerPort) map restartAnt,
+    antRestart <<= (antBuildFile, antBaseDir, antServerPort, antServerClasspath) map restartAnt,
+
+    antServerClasspath <<= (antHome, update) map buildServerClasspath,
 
     ant <<= inputTask { (argTask: TaskKey[Seq[String]]) =>
       (argTask, antServerPort, streams) map { (args: Seq[String], port: Int, streams: TaskStreams) =>
@@ -52,9 +56,11 @@ trait Settings {
 
   def antTaskKey(target: String) = TaskKey[Unit]("ant-run-" + target)
 
-  def startAnt(buildFile: File, baseDir: File, port: Int)
-  def stopAnt(port: Int)
-  def restartAnt(buildFile: File, baseDir: File, port: Int)
+  def startAnt(buildFile: File, baseDir: File, port: Int, classpath: Seq[File]) : Unit
+  def stopAnt(port: Int) : Unit
+  def restartAnt(buildFile: File, baseDir: File, port: Int, classpath: Seq[File]) : Unit
 
-  def runTarget(target: String, port: Int, logger: Logger)
+  def buildServerClasspath(antHome: File, report: UpdateReport) : Seq[File]
+
+  def runTarget(target: String, port: Int, logger: Logger) : Unit
 }
