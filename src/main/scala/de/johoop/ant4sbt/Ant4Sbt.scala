@@ -34,24 +34,9 @@ object Ant4Sbt extends Plugin with Settings {
 
   override def stopAnt(port: Int) = new AntClient(port).stopServer
 
+  override def runTarget(target: String, port: Int, logger: Logger) =
+    new AntClient(port) runTarget (target, logger)
 
-
-  val defaultAntHome =
-    Option(System getProperty "ant.home") getOrElse (Option(System getenv "ANT_HOME") getOrElse "<invalid ant.home>")
-
-  def antSettings(buildFile: File, baseDir: File = file("."), port: Int = 21345, antHome: String = defaultAntHome) : Seq[Setting[_]]= {
-
-    println("java -cp /work/misc/ant-plugin/target/scala-2.9.1/sbt-0.11.2/ant4sbt-1.0.0-SNAPSHOT.jar:%s/lib/ant.jar:%1$s/lib/ant-launcher.jar:/home/joachim/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.9.1.jar de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
-        antHome, buildFile.absolutePath, baseDir.absolutePath, port))
-
-    lazy val antClient = new AntClient(port)
-
-    antClient.targets map { antTarget =>
-      TaskKey[Unit]("ant-" + antTarget) <<= streams map { streams =>
-        antClient runTarget (antTarget, streams.log)
-      }
-    } toSeq
-  }
-
-  def ant(targetName: String) = TaskKey[Unit]("ant-" + targetName)
+// "java -cp /work/misc/ant-plugin/target/scala-2.9.1/sbt-0.11.2/ant4sbt-1.0.0-SNAPSHOT.jar:%s/lib/ant.jar:%1$s/lib/ant-launcher.jar:/home/joachim/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.9.1.jar de.johoop.ant4sbt.ant.AntServer %s %s %d"
+// antHome, buildFile.absolutePath, baseDir.absolutePath, port
 }

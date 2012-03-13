@@ -55,7 +55,7 @@ class AntServer(buildFile: File, baseDir: File) {
       }
     }
 
-    if (continue) acceptRequests(server)
+    if (continue) acceptRequests(server) else server.close
   }
 
   private def createLoggerFor(out: PrintStream) = {

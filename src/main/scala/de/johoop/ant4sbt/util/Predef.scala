@@ -10,6 +10,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 package de.johoop.ant4sbt.util
+
 import java.net.Socket
 import java.io.BufferedReader
 import java.io.PrintStream
