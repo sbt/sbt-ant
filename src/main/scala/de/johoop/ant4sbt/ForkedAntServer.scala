@@ -27,6 +27,6 @@ trait ForkedAntServer extends Settings {
 
   override def startAnt(buildFile: File, baseDir: File, port: Int, classpath: Seq[File]) = {
     "java -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
-        PathFinder(classpath).absString, buildFile.absolutePath, baseDir.absolutePath, port).run
+        PathFinder(classpath).absString, buildFile.absolutePath, baseDir.absolutePath, port).run // FIXME child process of xsbt?
   }
 }
