@@ -31,4 +31,5 @@ object Predef {
   }
 
   val done = "~~~ done"
+  val bye = "~~~ bye"
 }

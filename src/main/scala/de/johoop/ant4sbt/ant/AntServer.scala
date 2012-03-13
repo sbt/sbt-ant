@@ -27,7 +27,7 @@ import java.io.PrintStream
 object AntServer {
   def main(args: Array[String]) : Unit = {
     val antServer = new AntServer(new File(args(0)), new File(args(1)))
-    antServer serve 20000
+    antServer serve args(2).toInt
   }
 }
 
@@ -50,7 +50,7 @@ class AntServer(buildFile: File, baseDir: File) {
           out.println(done)
           true
         }
-        case "bye" => false
+        case `bye` => false
         case other => throw new IllegalStateException("invalid command: " + other)
       }
     }

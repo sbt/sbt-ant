@@ -9,6 +9,12 @@ import sbt.Logger
 class AntClient(port: Int) {
   import de.johoop.ant4sbt.util.Predef._
 
+  def stopServer = {
+    withSocketStreams(new Socket("localhost", port)) { (in, out) =>
+      out.println(bye)
+    }
+  }
+
   def targets = {
     withSocketStreams(new Socket("localhost", port)) { (in, out) =>
       out.println("targets")
