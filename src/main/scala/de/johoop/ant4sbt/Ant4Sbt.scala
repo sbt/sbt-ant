@@ -21,7 +21,6 @@ import org.fest.reflect.core.Reflection._
 
 object Ant4Sbt extends Plugin {
   def antSettings(buildFile: File, baseDir: File = new File(".")) : Seq[Setting[_]]= {
-//    Seq()
     lazy val project = new AntProject(buildFile, baseDir)
 
     project.targets map { antTarget =>

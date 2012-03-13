@@ -23,7 +23,8 @@ class AntProject(buildFile: File, baseDir: File) {
 
   private val classLoader = new URLClassLoader(Array(
       new URL("file:/work/misc/ant.jar"),
-      new URL("file:/work/misc/ant-launcher.jar")))
+      new URL("file:/work/misc/ant-launcher.jar"),
+      new URL("file:/opt/jdk/lib/tools.jar")))
 
   private val projectClass = `type`("org.apache.tools.ant.Project").withClassLoader(classLoader).load
   private val projectHelperClass = `type`("org.apache.tools.ant.ProjectHelper").withClassLoader(classLoader).load
