@@ -6,7 +6,7 @@ version := "1.0.0-SNAPSHOT"
 
 sbtPlugin := true
 
-libraryDependencies += "org.apache.ant" % "ant" % "1.8.2"
+libraryDependencies += "org.apache.ant" % "ant" % "1.8.3" % "provided"
 
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"

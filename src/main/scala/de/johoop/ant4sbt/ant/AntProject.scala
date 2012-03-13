@@ -6,35 +6,30 @@ import java.io.File
 import org.apache.tools.ant._
 import sbt.Logger
 
-class AntProject(buildFile: File, baseDir: File = new File(".")) {
+class AntProject(buildFile: File, baseDir: File) {
   private val project = initializeProject
-  private var loggerAdded = false
-
-  parseBuildFile
 
   private def initializeProject = {
     val project = new Project
     project setUserProperty ("ant.file", buildFile.getAbsolutePath)
     project setBaseDir baseDir
-    project init
+    project.init
 
     project
   }
 
-  private def parseBuildFile = {
-    ProjectHelper.configureProject(project, buildFile)
+  def configure = {
+    ProjectHelper configureProject (project, buildFile)
+    this
   }
 
-  def addLogger(logger: Logger) = {
-    if (! loggerAdded) {
-        project addBuildListener new AntBuildListener(logger)
-        loggerAdded = true
-    }
+  def runDefaultTarget(logger: BuildListener) = runTarget(project.getDefaultTarget, logger)
+
+  def runTarget(target: String, logger: BuildListener) = {
+    project addBuildListener logger
+    try project executeTarget target
+    finally project removeBuildListener logger
   }
-
-  def runDefaultTarget = runTarget(project.getDefaultTarget)
-
-  def runTarget(target: String) = project executeTarget target
 
   def targets = project.getCopyOfTargets.keySet.asScala map (_.asInstanceOf[String])
 }
