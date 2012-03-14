@@ -39,15 +39,21 @@ class AntServer(buildFile: File, baseDir: File) {
   @tailrec private def acceptRequests(server: ServerSocket) {
     val continue = withSocketStreams(server.accept) { (in, out) =>
       val antTargetPattern = "ant (.*)".r
+      val antPropertyPattern = "property (.*)".r
       in.readLine match {
         case "targets" => {
           project.targets foreach out.println
-          out.println(done)
+          out println done
           true
         }
-        case antTargetPattern(c) => {
-          project runTarget (c, createLoggerFor(out))
-          out.println(done)
+        case antTargetPattern(target) => {
+          project runTarget (target, createLoggerFor(out))
+          out println done
+          true
+        }
+        case antPropertyPattern(property) => {
+          project property property map (out println _)
+          out println done
           true
         }
         case `bye` => false

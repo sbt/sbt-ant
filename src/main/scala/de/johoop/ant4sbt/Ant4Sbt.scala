@@ -13,18 +13,19 @@ package de.johoop.ant4sbt
 
 import sbt._
 import sbt.Keys._
-import de.johoop.ant4sbt.ant.AntServer
 import de.johoop.ant4sbt.ant.AntClient
 
 object Ant4Sbt extends Plugin with ForkedAntServer {
 
-  override def restartAnt(buildFile: File, baseDir: File, port: Int, classpath: Seq[File]) = {
+  override def restartAnt(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File]) = {
     stopAnt(port)
-    startAnt(buildFile, baseDir, port, classpath)
+    startAnt(buildFile, baseDir, port, options, classpath)
   }
 
   override def stopAnt(port: Int) = new AntClient(port).stopServer
 
   override def runTarget(target: String, port: Int, logger: Logger) =
     new AntClient(port) runTarget (target, logger)
+
+  override def getProperty(property: String, port: Int) = new AntClient(port).property(property)
 }

@@ -11,6 +11,11 @@ class AntClient(port: Int) {
 
   def stopServer = withServer { (_, out) => out println bye }
 
+  def property(property: String) = withServer { (in, out) =>
+    out println ("property " + property)
+    readLines(in).headOption
+  }
+
   def targets = withServer { (in, out) =>
     out println "targets"
     readLines(in)
@@ -42,6 +47,6 @@ class AntClient(port: Int) {
     }
   }
 
-  private def withServer(op: (BufferedReader, PrintStream) => Unit) =
+  private def withServer[T](op: (BufferedReader, PrintStream) => T) =
     withSocketStreams(new Socket("localhost", port)) { (in, out) => op(in, out) }
 }

@@ -43,4 +43,6 @@ class AntProject(buildFile: File, baseDir: File) {
   }
 
   def targets = project.getCopyOfTargets.keySet.asScala map (_.asInstanceOf[String])
+
+  def property(property: String) = Option(project getProperty property)
 }
