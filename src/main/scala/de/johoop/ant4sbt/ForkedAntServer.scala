@@ -13,6 +13,7 @@ package de.johoop.ant4sbt
 
 import sbt._
 import sbt.Keys._
+import de.johoop.ant4sbt.ant.AntClient
 
 trait ForkedAntServer extends Settings {
 
@@ -35,12 +36,19 @@ trait ForkedAntServer extends Settings {
     (Option(System getenv "JAVA_HOME") map file) orElse
     (Option(System getProperty "java.home") map file)
 
-  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File]) = {
-    "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
-        options,
-        PathFinder(classpath).absString,
-        buildFile.absolutePath,
-        baseDir.absolutePath,
-        port).run
+  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams) = {
+    streams.log debug "Starting Ant server..."
+
+    val process = "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
+      options,
+      PathFinder(classpath).absString,
+      buildFile.absolutePath,
+      baseDir.absolutePath,
+      port) run streams.log
+
+    if (! new AntClient(port).ping) throw new IllegalStateException("unable to ping server")
+    else streams.log debug "Started successfully."
+
+    process
   }
 }

@@ -23,11 +23,18 @@ import java.io.PrintWriter
 import scala.annotation.tailrec
 import java.io.OutputStream
 import java.io.PrintStream
+import java.net.BindException
 
 object AntServer {
   def main(args: Array[String]) : Unit = {
     val antServer = new AntServer(new File(args(0)), new File(args(1)))
-    antServer serve args(2).toInt
+    val port = args(2).toInt
+    try {
+      antServer serve port
+    } catch {
+      case e: BindException =>
+        if (! new AntClient(port).ping) throw new IllegalStateException("unable to bind to port " + port, e)
+    }
   }
 }
 
@@ -41,27 +48,22 @@ class AntServer(buildFile: File, baseDir: File) {
       val antTargetPattern = "ant (.*)".r
       val antPropertyPattern = "property (.*)".r
       in.readLine match {
-        case "targets" => {
-          project.targets foreach out.println
-          out println done
-          true
-        }
-        case antTargetPattern(target) => {
-          project runTarget (target, createLoggerFor(out))
-          out println done
-          true
-        }
-        case antPropertyPattern(property) => {
-          project property property map (out println _)
-          out println done
-          true
-        }
+        case "targets" => success(out) { project.targets foreach out.println }
+        case "ping" => success(out) { out println "pong" }
+        case antTargetPattern(target) => success(out) { project runTarget (target, createLoggerFor(out)) }
+        case antPropertyPattern(property) => success(out) { project property property map (out println _) }
         case `bye` => false
         case other => throw new IllegalStateException("invalid command: " + other)
       }
     }
 
     if (continue) acceptRequests(server) else server.close
+  }
+
+  private def success(out: PrintStream)(op : => Unit) = {
+    op
+    out println done
+    true
   }
 
   private def createLoggerFor(out: PrintStream) = {
