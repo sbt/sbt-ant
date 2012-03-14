@@ -17,12 +17,12 @@ import de.johoop.ant4sbt.ant.AntClient
 
 object Ant4Sbt extends Plugin with ForkedAntServer {
 
-  override def restartAnt(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File]) = {
-    stopAnt(port)
-    startAnt(buildFile, baseDir, port, options, classpath)
+  override def restartAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File]) = {
+    stopAntServer(port)
+    startAntServer(buildFile, baseDir, port, options, classpath)
   }
 
-  override def stopAnt(port: Int) = new AntClient(port).stopServer
+  override def stopAntServer(port: Int) = new AntClient(port).stopServer
 
   override def runTarget(target: String, port: Int, logger: Logger) =
     new AntClient(port) runTarget (target, logger)

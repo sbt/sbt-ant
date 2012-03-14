@@ -16,16 +16,26 @@ import sbt.Keys._
 
 trait ForkedAntServer extends Settings {
 
-  override def buildServerClasspath(javaHome: File, antHome: File, resolved: UpdateReport) = {
+  override def buildServerClasspath(javaHome: Option[File], antHome: File, resolved: UpdateReport) = {
     Seq(IO.classLocationFile(classOf[de.johoop.ant4sbt.ant.AntServer])) ++
     filesOf("org.scala-lang" % "scala-library" % "2.9.1", resolved) ++
-    ((antHome / "lib") * "*.jar").get :+
-    (javaHome / "lib" / "tools.jar")
+    ((antHome / "lib") * "*.jar").get ++
+    toolsJar(javaHomeHeuristic(javaHome))
   }
 
   private def filesOf(m: ModuleID, resolved: UpdateReport): Seq[File] = resolved.select(module = (_: ModuleID) == m)
 
-  override def startAnt(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File]) = {
+  private def toolsJar(maybeJavaHome: Option[File]) =
+    maybeJavaHome map {
+      javaHome => Seq(javaHome / "lib" / "tools.jar", javaHome / ".." / "lib" / "tools.jar")
+    } getOrElse Seq()
+
+  private def javaHomeHeuristic(maybeJavaHome: Option[File]) =
+    maybeJavaHome orElse
+    (Option(System getenv "JAVA_HOME") map file) orElse
+    (Option(System getProperty "java.home") map file)
+
+  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File]) = {
     "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
         options,
         PathFinder(classpath).absString,
