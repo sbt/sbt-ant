@@ -16,7 +16,7 @@ import sbt.Keys._
 
 trait Settings extends Keys {
   val antSettings = Seq[Setting[_]](
-    antHome := file(System getenv "ANT_HOME"),
+    antHome := file(Option(System getenv "ANT_HOME") getOrElse "/usr/share/ant"),
     antOptions := Option(System getenv "ANT_OPTS") getOrElse "",
 
     antServerPort := 21345,
