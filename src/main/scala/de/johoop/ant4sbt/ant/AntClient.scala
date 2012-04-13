@@ -6,6 +6,9 @@ import java.io.InputStreamReader
 import scala.annotation.tailrec
 import sbt.Logger
 import java.net.ConnectException
+import scala.concurrent.ops
+import java.io.OutputStream
+import scala.concurrent.SyncVar
 
 class AntClient(port: Int) {
   import de.johoop.ant4sbt.util.Predef._
@@ -47,17 +50,30 @@ class AntClient(port: Int) {
 
   def runTarget(target: String, logger: Logger) = withServer { (in, out) =>
     out println ("ant " + target)
-    logLines(in, logger)
+
+    val running = new SyncVar[Boolean]
+    running set true
+    ops.spawn { pipeConsoleInputToServer(running, out) }
+    logLines(running, in, logger)
   }
 
   @tailrec
-  private def logLines(in: BufferedReader, logger: Logger) : Unit = {
+  private def pipeConsoleInputToServer(running: SyncVar[Boolean], out: OutputStream) : Unit = {
+    val inputChars = System.in.available
+    if (inputChars > 0) out write System.in.read
+    else Thread sleep 100
+
+    if (running get) pipeConsoleInputToServer(running, out)
+  }
+
+  @tailrec
+  private def logLines(running: SyncVar[Boolean], in: BufferedReader, logger: Logger) : Unit = {
     val line = in.readLine
     line match {
-      case `done` => ()
+      case `done` => running set false
       case line => {
         logger info line
-        logLines(in, logger)
+        logLines(running, in, logger)
       }
     }
   }

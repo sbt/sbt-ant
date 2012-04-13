@@ -50,7 +50,7 @@ class AntServer(buildFile: File, baseDir: File) {
       in.readLine match {
         case "targets" => success(out) { project.targets foreach out.println }
         case "ping" => success(out) { out println "pong" }
-        case antTargetPattern(target) => success(out) { project runTarget (target, createLoggerFor(out)) }
+        case antTargetPattern(target) => success(out) { project runTarget (target, in, createLoggerFor(out)) }
         case antPropertyPattern(property) => success(out) { project property property map (out println _) }
         case `bye` => false
         case other => throw new IllegalStateException("invalid command: " + other)

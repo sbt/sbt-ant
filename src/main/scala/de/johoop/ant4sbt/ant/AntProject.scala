@@ -13,9 +13,10 @@ package de.johoop.ant4sbt.ant
 
 import scala.collection.JavaConverters._
 import java.io.File
-
 import org.apache.tools.ant._
 import sbt.Logger
+import java.io.InputStream
+import java.io.BufferedReader
 
 class AntProject(buildFile: File, baseDir: File) {
   private val project = initializeProject
@@ -34,10 +35,11 @@ class AntProject(buildFile: File, baseDir: File) {
     this
   }
 
-  def runDefaultTarget(logger: BuildListener) = runTarget(project.getDefaultTarget, logger)
+  def runDefaultTarget(in: BufferedReader, logger: BuildListener) = runTarget(project.getDefaultTarget, in, logger)
 
-  def runTarget(target: String, logger: BuildListener) = {
+  def runTarget(target: String, in: BufferedReader, logger: BuildListener) = {
     project addBuildListener logger
+    project setInputHandler new ServerInputHandler(in)
     try project executeTarget target
     finally project removeBuildListener logger
   }
