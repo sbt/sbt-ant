@@ -2,11 +2,11 @@ organization := "de.johoop"
 
 name := "ant4sbt"
 
-version := "1.0.1"
+version := "1.0.2"
 
 sbtPlugin := true
 
-libraryDependencies += "org.apache.ant" % "ant" % "1.8.3"
+libraryDependencies += "org.apache.ant" % "ant" % "1.8.4"
 
 publishTo <<= version { v: String =>
   val nexus = "https://oss.sonatype.org/"
