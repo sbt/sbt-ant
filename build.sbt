@@ -2,7 +2,7 @@ organization := "de.johoop"
 
 name := "ant4sbt"
 
-version := "1.0.2"
+version := "1.0.3"
 
 sbtPlugin := true
 

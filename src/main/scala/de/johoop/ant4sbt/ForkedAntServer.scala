@@ -14,17 +14,17 @@ package de.johoop.ant4sbt
 import sbt._
 import sbt.Keys._
 import de.johoop.ant4sbt.ant.AntClient
+import xsbti.AppConfiguration
 
 trait ForkedAntServer extends Settings {
 
-  override def buildServerClasspath(javaHome: Option[File], antHome: File, resolved: UpdateReport) = {
-    Seq(IO.classLocationFile(classOf[de.johoop.ant4sbt.ant.AntServer])) ++
-    filesOf("org.scala-lang" % "scala-library" % "2.9.1", resolved) ++
-    ((antHome / "lib") * "*.jar").get ++
-    toolsJar(javaHomeHeuristic(javaHome))
-  }
+  override def buildServerClasspath(javaHome: Option[File], antHome: File, config: AppConfiguration) = {
 
-  private def filesOf(m: ModuleID, resolved: UpdateReport): Seq[File] = resolved.select(module = (_: ModuleID) == m)
+    Seq(IO.classLocationFile(classOf[de.johoop.ant4sbt.ant.AntServer])) ++
+    ((antHome / "lib") * "*.jar").get ++
+    toolsJar(javaHomeHeuristic(javaHome)) :+
+    config.provider.scalaProvider.libraryJar
+  }
 
   private def toolsJar(maybeJavaHome: Option[File]) =
     maybeJavaHome map {

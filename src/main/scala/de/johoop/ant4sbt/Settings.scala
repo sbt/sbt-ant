@@ -13,6 +13,7 @@ package de.johoop.ant4sbt
 
 import sbt._
 import sbt.Keys._
+import xsbti.AppConfiguration
 
 trait Settings extends Keys {
   val antSettings = Seq[Setting[_]](
@@ -27,7 +28,7 @@ trait Settings extends Keys {
     antStopServer <<= (antServerPort) map stopAntServer,
     antRestartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams) map restartAntServer,
 
-    antServerClasspath <<= (javaHome, antHome, update) map buildServerClasspath,
+    antServerClasspath <<= (javaHome, antHome, appConfiguration) map buildServerClasspath,
 
     antRun <<= inputTask { (argTask: TaskKey[Seq[String]]) =>
       (antStartServer, argTask, antServerPort, streams) map { (_, args, port, streams) =>
@@ -62,7 +63,7 @@ trait Settings extends Keys {
   def stopAntServer(port: Int) : Unit
   def restartAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams) : Process
 
-  def buildServerClasspath(javaHome: Option[File], antHome: File, report: UpdateReport) : Seq[File]
+  def buildServerClasspath(javaHome: Option[File], antHome: File, config: AppConfiguration) : Seq[File]
 
   def runTarget(target: String, port: Int, logger: Logger) : Unit
   def getProperty(property: String, port: Int) : Option[String]
