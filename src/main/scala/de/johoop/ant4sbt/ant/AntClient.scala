@@ -20,17 +20,17 @@ class AntClient(port: Int) {
       readLines(in).headOption
   }
 
-  def ping = retry(10, 20L) { withServer { (in, out) =>
+  def ping = retry(20, 50L, 25L) { withServer { (in, out) =>
     out println "ping"
     readLines(in).head == "pong"
   } }
 
-  def retry[T](times: Int, delay: Long)(op: => T) : T =
+  def retry[T](times: Int, delay: Long, delayInc: Long)(op: => T) : T =
     if (times == 1) op else try op
     catch {
       case _: ConnectException => {
        Thread sleep delay
-        retry(times - 1, delay)(op)
+        retry(times - 1, delay + delayInc, delayInc)(op)
       }
     }
 
