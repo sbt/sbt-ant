@@ -36,7 +36,7 @@ trait ForkedAntServer extends Settings {
     (sys.env get "JAVA_HOME" map file) orElse
     (sys.props get"java.home" map file)
 
-  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams) = {
+  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) = {
     streams.log debug "Starting Ant server..."
 
     val process = "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
@@ -44,7 +44,7 @@ trait ForkedAntServer extends Settings {
       PathFinder(classpath).absString,
       buildFile.absolutePath,
       baseDir.absolutePath,
-      port) run streams.log
+      port) run logging(streams.log)
 
     if (! new AntClient(port).ping) throw new IllegalStateException("unable to ping server")
     else streams.log debug "Started successfully."

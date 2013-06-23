@@ -24,11 +24,17 @@ trait Settings extends Keys {
     antBuildFile <<= baseDirectory (_ / "build.xml"),
     antBaseDir <<= baseDirectory,
 
-    antStartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams) map startAntServer,
+    antStartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams, antServerLogger) map startAntServer,
     antStopServer <<= (antServerPort) map stopAntServer,
-    antRestartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams) map restartAntServer,
+    antRestartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams, antServerLogger) map restartAntServer,
 
     antServerClasspath <<= (javaHome, antHome, appConfiguration) map buildServerClasspath,
+
+    antServerLogger := { logger => new ProcessLogger {
+      def buffer[T](f: ⇒ T): T = f
+      def error(s: ⇒ String): Unit = logger error s
+      def info(s: ⇒ String): Unit = logger info s
+    }},
 
     antRun <<= inputTask { (argTask: TaskKey[Seq[String]]) =>
       (antStartServer, argTask, antServerPort, streams) map { (_, args, port, streams) =>
@@ -59,9 +65,9 @@ trait Settings extends Keys {
 
   def antPropertyKey(property: String) = TaskKey[Option[String]]("ant-property-" + property)
 
-  def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams) : Process
+  def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
   def stopAntServer(port: Int) : Unit
-  def restartAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams) : Process
+  def restartAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
 
   def buildServerClasspath(javaHome: Option[File], antHome: File, config: AppConfiguration) : Seq[File]
 

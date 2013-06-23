@@ -35,8 +35,8 @@ class AntClient(port: Int) {
     }
 
   def targets = withServer { (in, out) =>
-      out println "targets"
-      readLines(in)
+    out println "targets"
+    readLines(in)
   }
 
   @tailrec

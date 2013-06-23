@@ -19,6 +19,7 @@ trait Keys {
   val antHome = SettingKey[File]("ant-home", "Home directory of Ant (ANT_HOME).")
   val antOptions = SettingKey[String]("ant-options", "Additional JVM options for Ant (ANT_OPTS).")
   val antServerPort = SettingKey[Int]("ant-server-port", "Port the Ant server should listen at.")
+  val antServerLogger = SettingKey[Logger => ProcessLogger]("ant-server-logger", "Logging strategy for the ant server.")
 
   val antServerClasspath = TaskKey[Seq[File]]("ant-server-classpath", "Classpath for the forked Ant server.")
 
