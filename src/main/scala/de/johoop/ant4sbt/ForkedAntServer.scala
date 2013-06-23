@@ -33,8 +33,8 @@ trait ForkedAntServer extends Settings {
 
   private def javaHomeHeuristic(maybeJavaHome: Option[File]) =
     maybeJavaHome orElse
-    (Option(System getenv "JAVA_HOME") map file) orElse
-    (Option(System getProperty "java.home") map file)
+    (sys.env get "JAVA_HOME" map file) orElse
+    (sys.props get"java.home" map file)
 
   override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams) = {
     streams.log debug "Starting Ant server..."
