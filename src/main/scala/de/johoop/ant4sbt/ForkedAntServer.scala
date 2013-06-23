@@ -18,13 +18,12 @@ import xsbti.AppConfiguration
 
 trait ForkedAntServer extends Settings {
 
-  override def buildServerClasspath(javaHome: Option[File], antHome: File, config: AppConfiguration) = {
-
-    Seq(IO.classLocationFile(classOf[de.johoop.ant4sbt.ant.AntServer])) ++
-    ((antHome / "lib") * "*.jar").get ++
-    toolsJar(javaHomeHeuristic(javaHome)) :+
-    config.provider.scalaProvider.libraryJar
-  }
+  override def buildServerClasspath(javaHome: Option[File], config: AppConfiguration) =
+    Seq(IO.classLocationFile(classOf[de.johoop.ant4sbt.ant.AntServer]),
+        IO.classLocationFile(classOf[org.apache.tools.ant.Project]),
+        IO.classLocationFile(classOf[org.apache.tools.ant.launch.AntMain]),
+        config.provider.scalaProvider.libraryJar
+    ) ++ toolsJar(javaHomeHeuristic(javaHome))
 
   private def toolsJar(maybeJavaHome: Option[File]) =
     maybeJavaHome map {
@@ -34,7 +33,7 @@ trait ForkedAntServer extends Settings {
   private def javaHomeHeuristic(maybeJavaHome: Option[File]) =
     maybeJavaHome orElse
     (sys.env get "JAVA_HOME" map file) orElse
-    (sys.props get"java.home" map file)
+    (sys.props get "java.home" map file)
 
   override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) = {
     streams.log debug "Starting Ant server..."

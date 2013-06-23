@@ -17,8 +17,7 @@ import xsbti.AppConfiguration
 
 trait Settings extends Keys {
   val antSettings = Seq[Setting[_]](
-    antHome := file(Option(System getenv "ANT_HOME") getOrElse "/usr/share/ant"),
-    antOptions := Option(System getenv "ANT_OPTS") getOrElse "",
+    antOptions := sys.env getOrElse ("ANT_OPTS", ""),
 
     antServerPort := 21345,
     antBuildFile <<= baseDirectory (_ / "build.xml"),
@@ -28,7 +27,7 @@ trait Settings extends Keys {
     antStopServer <<= (antServerPort) map stopAntServer,
     antRestartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams, antServerLogger) map restartAntServer,
 
-    antServerClasspath <<= (javaHome, antHome, appConfiguration) map buildServerClasspath,
+    antServerClasspath <<= (javaHome, appConfiguration) map buildServerClasspath,
 
     antServerLogger := { logger => new ProcessLogger {
       def buffer[T](f: ⇒ T): T = f
@@ -58,10 +57,10 @@ trait Settings extends Keys {
 
   def antTaskKey(target: String) = TaskKey[Unit]("ant-run-" + target)
 
-  def addAntProperties(properties: String*) : Seq[Setting[_]] = {
+  def addAntProperties(properties: String*) : Seq[Setting[_]] =
     for (property <- properties)
     yield antPropertyKey(property) <<= (antStartServer, antServerPort) map { (_, port) => getProperty(property, port) }
-  }
+
 
   def antPropertyKey(property: String) = TaskKey[Option[String]]("ant-property-" + property)
 
@@ -69,7 +68,7 @@ trait Settings extends Keys {
   def stopAntServer(port: Int) : Unit
   def restartAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
 
-  def buildServerClasspath(javaHome: Option[File], antHome: File, config: AppConfiguration) : Seq[File]
+  def buildServerClasspath(javaHome: Option[File], config: AppConfiguration) : Seq[File]
 
   def runTarget(target: String, port: Int, logger: Logger) : Unit
   def getProperty(property: String, port: Int) : Option[String]

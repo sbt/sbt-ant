@@ -16,7 +16,6 @@ import sbt._
 trait Keys {
   val antBuildFile = SettingKey[File]("ant-build-file", "Location of the Ant build file (usually named 'build.xml').")
   val antBaseDir = SettingKey[File]("ant-base-dir", "Base directory for the Ant build.")
-  val antHome = SettingKey[File]("ant-home", "Home directory of Ant (ANT_HOME).")
   val antOptions = SettingKey[String]("ant-options", "Additional JVM options for Ant (ANT_OPTS).")
   val antServerPort = SettingKey[Int]("ant-server-port", "Port the Ant server should listen at.")
   val antServerLogger = SettingKey[Logger => ProcessLogger]("ant-server-logger", "Logging strategy for the ant server.")
