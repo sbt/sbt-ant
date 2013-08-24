@@ -38,7 +38,7 @@ trait ForkedAntServer extends Settings {
   override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) = {
     streams.log debug "Starting Ant server..."
 
-    val process = "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
+    val process = "java %s -cp \"%s\" de.johoop.ant4sbt.ant.AntServer \"%s\" \"%s\" %d".format(
       options,
       PathFinder(classpath).absString,
       buildFile.absolutePath,
