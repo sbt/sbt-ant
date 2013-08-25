@@ -1,7 +1,7 @@
 /*
  * This file is part of ant4sbt.
  *
- * Copyright (c) 2012 Joachim Hofer
+ * Copyright (c) 2012, 2013 Joachim Hofer
  * All rights reserved.
  *
  * This program and the accompanying materials
