@@ -21,9 +21,8 @@ trait ForkedAntServer extends Settings {
   override def buildServerClasspath(javaHome: Option[File], config: AppConfiguration) =
     Seq(IO.classLocationFile(classOf[de.johoop.ant4sbt.ant.AntServer]),
         IO.classLocationFile(classOf[org.apache.tools.ant.Project]),
-        IO.classLocationFile(classOf[org.apache.tools.ant.launch.AntMain]),
-        config.provider.scalaProvider.libraryJar
-    ) ++ toolsJar(javaHomeHeuristic(javaHome))
+        IO.classLocationFile(classOf[org.apache.tools.ant.launch.AntMain])) ++ 
+      config.provider.scalaProvider.jars ++ toolsJar(javaHomeHeuristic(javaHome))
 
   private def toolsJar(maybeJavaHome: Option[File]) =
     maybeJavaHome map {
