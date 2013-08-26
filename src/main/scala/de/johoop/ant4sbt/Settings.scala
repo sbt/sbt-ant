@@ -35,15 +35,15 @@ trait Settings extends Keys {
       def info(s: ⇒ String): Unit = logger info s
     }},
 
-    antRun <<= inputTask { (argTask: TaskKey[Seq[String]]) =>
-      (antStartServer, argTask, antServerPort, streams) map { (_, args, port, streams) =>
-        args foreach (runTarget(_, port, streams.log))
-      }
+    antRun := {
+      Def.spaceDelimited("<target>").parsed foreach (runTarget(_, antServerPort.value, streams.value.log))
     },
+    antRun <<= antRun.dependsOn(antStartServer),
 
-    antProperty <<= inputTask { (argTask: TaskKey[Seq[String]]) =>
-      (antStartServer, argTask, antServerPort) map { (_, args, port) => getProperty(args.head, port) }
+    antProperty := {
+      getProperty(Def.spaceDelimited("<property>").parsed.head, antServerPort.value)
     },
+    antProperty <<= antProperty.dependsOn(antStartServer),
 
     onLoad in Global <<= antServerPort { port => (_ addExitHook (stopAntServer(port))) }
   )
