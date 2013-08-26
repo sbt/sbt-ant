@@ -1,7 +1,7 @@
 /*
  * This file is part of ant4sbt.
  *
- * Copyright (c) 2012 Joachim Hofer
+ * Copyright (c) 2012, 2013 Joachim Hofer
  * All rights reserved.
  *
  * This program and the accompanying materials
@@ -16,7 +16,7 @@ import sbt._
 trait Keys {
   val antBuildFile = SettingKey[File]("ant-build-file", "Location of the Ant build file (usually named 'build.xml').")
   val antBaseDir = SettingKey[File]("ant-base-dir", "Base directory for the Ant build.")
-  val antOptions = SettingKey[String]("ant-options", "Additional JVM options for Ant (ANT_OPTS).")
+  val antOptions = SettingKey[Seq[String]]("ant-options", "Additional JVM options for Ant (ANT_OPTS).")
   val antServerPort = SettingKey[Int]("ant-server-port", "Port the Ant server should listen at.")
   val antServerLogger = SettingKey[Logger => ProcessLogger]("ant-server-logger", "Logging strategy for the ant server.")
 

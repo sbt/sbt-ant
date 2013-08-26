@@ -1,7 +1,7 @@
 /*
  * This file is part of ant4sbt.
  *
- * Copyright (c) 2012 Joachim Hofer
+ * Copyright (c) 2012, 2013 Joachim Hofer
  * All rights reserved.
  *
  * This program and the accompanying materials
@@ -17,7 +17,7 @@ import xsbti.AppConfiguration
 
 trait Settings extends Keys {
   val antSettings = Seq[Setting[_]](
-    antOptions := sys.env getOrElse ("ANT_OPTS", ""),
+    antOptions := sys.env get "ANT_OPTS" map (_ split " " toSeq) getOrElse Seq(),
 
     antServerPort := 21345,
     antBuildFile := baseDirectory.value / "build.xml",
@@ -64,9 +64,9 @@ trait Settings extends Keys {
 
   def antPropertyKey(property: String) = TaskKey[Option[String]]("ant-property-" + property)
 
-  def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
+  def startAntServer(buildFile: File, baseDir: File, port: Int, options: Seq[String], classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
   def stopAntServer(port: Int) : Unit
-  def restartAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
+  def restartAntServer(buildFile: File, baseDir: File, port: Int, options: Seq[String], classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) : Process
 
   def buildServerClasspath(javaHome: Option[File], config: AppConfiguration) : Seq[File]
 

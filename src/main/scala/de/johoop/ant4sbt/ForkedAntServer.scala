@@ -34,17 +34,15 @@ trait ForkedAntServer extends Settings {
     (sys.env get "JAVA_HOME" map file) orElse
     (sys.props get "java.home" map file)
 
-  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) = {
+  override def startAntServer(buildFile: File, baseDir: File, port: Int, options: Seq[String], classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) = {
     streams.log debug "Starting Ant server..."
 
-    val cmd = "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
-      options,
-      PathFinder(classpath).absString,
-      buildFile.absolutePath,
-      baseDir.absolutePath,
-      port)
+    val cmd = "java" +: (options ++ Seq(
+      "-cp", PathFinder(classpath).absString, 
+      "de.johoop.ant4sbt.ant.AntServer",
+      buildFile.absolutePath, baseDir.absolutePath, port.toString))
 
-    streams.log debug s"> $cmd"
+    streams.log debug s"> ${cmd mkString " "}"
 
     val process = cmd run logging(streams.log)
 
