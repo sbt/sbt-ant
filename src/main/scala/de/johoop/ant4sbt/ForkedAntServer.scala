@@ -38,12 +38,16 @@ trait ForkedAntServer extends Settings {
   override def startAntServer(buildFile: File, baseDir: File, port: Int, options: String, classpath: Seq[File], streams: TaskStreams, logging: Logger => ProcessLogger) = {
     streams.log debug "Starting Ant server..."
 
-    val process = "java %s -cp \"%s\" de.johoop.ant4sbt.ant.AntServer \"%s\" \"%s\" %d".format(
+    val cmd = "java %s -cp %s de.johoop.ant4sbt.ant.AntServer %s %s %d".format(
       options,
       PathFinder(classpath).absString,
       buildFile.absolutePath,
       baseDir.absolutePath,
-      port) run logging(streams.log)
+      port)
+
+    streams.log debug s"> $cmd"
+
+    val process = cmd run logging(streams.log)
 
     if (! new AntClient(port).ping) throw new IllegalStateException("unable to ping server")
     else streams.log debug "Started successfully."

@@ -6,7 +6,6 @@ import java.io.InputStreamReader
 import scala.annotation.tailrec
 import sbt.Logger
 import java.net.ConnectException
-import scala.concurrent.ops
 import java.io.OutputStream
 import scala.concurrent.SyncVar
 
@@ -49,11 +48,14 @@ class AntClient(port: Int) {
   }
 
   def runTarget(target: String, logger: Logger) = withServer { (in, out) =>
+    import scala.concurrent._
+    import ExecutionContext.Implicits.global
+
     out println ("ant " + target)
 
     val running = new SyncVar[Boolean]
-    running set true
-    ops.spawn { pipeConsoleInputToServer(running, out) }
+    running put true
+    future { pipeConsoleInputToServer(running, out) }
     logLines(running, in, logger)
   }
 
@@ -63,14 +65,15 @@ class AntClient(port: Int) {
     if (inputChars > 0) out write System.in.read
     else Thread sleep 100
 
-    if (running get) pipeConsoleInputToServer(running, out)
+    if (running isSet) pipeConsoleInputToServer(running, out)
   }
 
   @tailrec
   private def logLines(running: SyncVar[Boolean], in: BufferedReader, logger: Logger) : Unit = {
     val line = in.readLine
     line match {
-      case `done` => running set false
+      case `done` => 
+        running.take
       case line => {
         logger info line
         logLines(running, in, logger)

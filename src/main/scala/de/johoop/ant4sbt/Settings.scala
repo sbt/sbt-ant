@@ -20,11 +20,11 @@ trait Settings extends Keys {
     antOptions := sys.env getOrElse ("ANT_OPTS", ""),
 
     antServerPort := 21345,
-    antBuildFile <<= baseDirectory (_ / "build.xml"),
+    antBuildFile := baseDirectory.value / "build.xml",
     antBaseDir <<= baseDirectory,
 
     antStartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams, antServerLogger) map startAntServer,
-    antStopServer <<= (antServerPort) map stopAntServer,
+    antStopServer <<= antServerPort map stopAntServer,
     antRestartServer <<= (antBuildFile, antBaseDir, antServerPort, antOptions, antServerClasspath, streams, antServerLogger) map restartAntServer,
 
     antServerClasspath <<= (javaHome, appConfiguration) map buildServerClasspath,
