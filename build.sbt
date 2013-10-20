@@ -8,8 +8,6 @@ sbtPlugin := true
 
 libraryDependencies += "org.apache.ant" % "ant" % "1.9.2"
 
-resolvers += "Sonatype Release" at "https://oss.sonatype.org/content/repositories/releases"
-
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-language:_")
